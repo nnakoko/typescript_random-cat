@@ -9,31 +9,32 @@ type Props = {
 }
 
 //ページコンポーネント関数にpropsを受け取る引数を追加する
-const IndexPage: NextPage<Props> = ({ initialCatImageUrl }) => {
-  const [catImageUrl, setCatImageUrl] = useState(initialCatImageUrl);
+const IndexPage: NextPage<Props> = ({initialImageUrl}) => {
+  //useStateを使って状態を定義する
+  const [imageUrl, setImageUrl] = useState(initialImageUrl);
+  const [loading, setLoading] = useState(false);
 
+  //マウント時に読み込む宣言
+  useEffect(() => {
+    fetchImage().then((newImage) => {
+      setImageUrl(newImage.url); //画像URLの状態を更新する
+      setLoading(false); //ローディング状態を更新する
+    });
+  }, []);
+
+  //ボタンをクリックしたときに画像を読み込む処理
   const handleClick = async () => {
-    const image = await fetchImage();
-    setCatImageUrl(image.url);
-  };
+    setLoading(true); //読み込みフラグを立てる
+    const newImage = await fetchImage();
+    setImageUrl(newImage.url); //画像URLの状態を更新する
+    setLoading(false); //読込中フラグを倒す
+  }
 
+  //ローディング中でなければ、画像を表示する
   return (
-    <div>
-      <button
-        onClick={handleClick}
-        style={{
-          backgroundColor: "#319795",
-          border: "none",
-          borderRadius: "4px",
-          color: "white",
-          padding: "4px 8px",
-        }}
-      >
-        きょうのにゃんこ🐱
-      </button>
-      <div style={{ marginTop: 8, maxWidth: 500 }}>
-        <img src={catImageUrl} width="100%" height="auto" alt="猫" />
-      </div>
+    <div className={style.page}>
+      <button onClick={handleClick} className={style.button}>他のにゃんこも見る</button>
+      <div className={style.frame}>{loading || <img src={imageUrl} />}</div>
     </div>
   );
 };
